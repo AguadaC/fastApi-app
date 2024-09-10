@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Settings of the project."""
+
 import os
 
 

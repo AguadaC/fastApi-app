@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """Module of constants"""
 
+# -----------------------------------------------------------------------------
 # App metadata
 TITLE = "Challenge"
 DESCRIPTION = "Challenge to apply for a job"

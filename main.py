@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
+"""Main application"""
+
 import uvicorn
 
 from fastapi import FastAPI
 from typing import AsyncIterator
 
 from challenge import constants
+from challenge.api import leads
 from challenge.core.log_manager import LogManager
 
 
@@ -43,10 +47,13 @@ app.version = constants.VERSION
 app.contact = constants.CONTACT
 
 # Include all APIs routers
+app.include_router(leads.router, prefix="/leads", tags=["leads"])
+
 # Response exceptions Handlers
 
 def run_dev_server():
     """Run the server for development purposes."""
+
     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 
 
