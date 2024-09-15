@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from typing import AsyncIterator
 
 from challenge import constants
-from challenge.api import leads
+from challenge.api import api_leads, api_enroll
 from challenge.core.log_manager import LogManager
 
 
@@ -47,7 +47,8 @@ app.version = constants.VERSION
 app.contact = constants.CONTACT
 
 # Include all APIs routers
-app.include_router(leads.router, prefix="/leads", tags=["leads"])
+app.include_router(api_leads.router, prefix="/leads", tags=["leads"])
+app.include_router(api_enroll.router, prefix="/enroll", tags=["enroll"])
 
 # Response exceptions Handlers
 

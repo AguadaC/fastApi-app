@@ -37,13 +37,14 @@ class LogManager(metaclass=Singleton):
         """Configures the logger"""
 
         logging.basicConfig(
-            level=self._log_level,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            level  = self._log_level,
+            format = settings.LOG_FORMAT
         )
         self._logger = logging.getLogger(TITLE)
 
         log_filename = f"{self._log_dir}/{self._timestamp}_{TITLE}.log"
         file_handler = RotatingFileHandler(log_filename, maxBytes=10*1024*1024, backupCount=5)
+        file_handler.setFormatter(logging.Formatter(settings.LOG_FORMAT))
         self._logger.addHandler(file_handler)
 
     def logger(self) -> logging.Logger:
