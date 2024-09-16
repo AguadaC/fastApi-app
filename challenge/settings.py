@@ -10,7 +10,7 @@ LOG_DIR = os.environ.get("LOG_DIR", "/opt/chanllenge/logs/")
 
 # -----------------------------------------------------------------------------
 # Unit internal configurations
-DEBUG = os.environ.get("DEBUG", False)
+DEBUG = os.environ.get("DEBUG", True)
 
 # -----------------------------------------------------------------------------
 # Data Base configurations

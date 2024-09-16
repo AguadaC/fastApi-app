@@ -11,3 +11,7 @@ CONTACT = {
     "email": "aguadacristian@gmail.com",
 }
 VERSION = "0.0.1.dev1"
+
+# -----------------------------------------------------------------------------
+# Exceptions
+DEFAULT_ERROR_MESSAGE = "No detail provided."

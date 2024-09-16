@@ -72,6 +72,4 @@ async def get_lead_by_id(request: Request, register_id: int = Path(gt = 0)):
     logger.info("Getting lead by ID {register_id}...")
     db_handler = DbHandler()
     lead = await db_handler.get_student_by_id(register_id)
-    if lead is None:
-        pass # exception
     return lead

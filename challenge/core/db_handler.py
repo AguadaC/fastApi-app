@@ -8,6 +8,15 @@ from sqlalchemy.exc import NoResultFound
 from typing import List, Optional
 
 from challenge import settings
+from challenge.core.log_manager import LogManager
+from challenge.exceptions import (StudentAlreadyExists,
+                                  StudentDoesNotExist,
+                                  StudentCareerEnroll,
+                                  CareerDoesNotExist,
+                                  StudentSubjectEnroll,
+                                  UnenrolledStudent,
+                                  SubjectDoesNotExist,
+                                  CareerSubjectDoesNotExist)
 from challenge.models.sql_models import (Student,
                                          Career,
                                          Subject,
@@ -15,9 +24,10 @@ from challenge.models.sql_models import (Student,
                                          CareerSubject,
                                          SubjectEnrollment)
 
+logger = LogManager().logger()
 
 class DbHandler:
-    """Class to manage db transfers"""
+    """Class to manage transfers with the db"""
 
     def __init__(self):
         """
@@ -58,7 +68,9 @@ class DbHandler:
             async with session.begin():
                 student_id_exists = await self._get_student_id_by_dni(dni=dni)
                 if student_id_exists:
-                    return student_id_exists
+                    raise StudentAlreadyExists(
+                        f"Student with DNI: {dni}, exists. ID record: {student_id_exists}"
+                    )
                 new_student = Student(dni=dni, name=name, email=email, phone=phone)
                 session.add(new_student)
                 await session.flush()
@@ -92,6 +104,8 @@ class DbHandler:
                 select(Student).where(Student.student_id == student_id)
             )
             student = result.scalars().first()
+            if not student:
+                raise StudentDoesNotExist(f"No Student with ID: {student_id}")
         return student
 
     async def enroll_student_in_a_career(self, dni: str, career_name: str) -> int:
@@ -111,7 +125,7 @@ class DbHandler:
                 student_career_id = await self._get_student_career_id(dni=dni,
                                                                       career_name=career_name)
                 if student_career_id:
-                    return student_career_id
+                    raise StudentCareerEnroll(f"Student is already enrolled in: {career_name}")
 
                 student_id = await self._get_student_id_by_dni(dni=dni)
                 career_id = await self._get_career_id_by_name(name=career_name)
@@ -147,7 +161,7 @@ class DbHandler:
                         subject_name=subject_name
                     )
                     if existing_enrollment:
-                        return existing_enrollment
+                        raise StudentSubjectEnroll(f"Student is already enrolled in: {subject_name}")
 
                     enrolled = await self._get_student_career_id(dni=dni,
                                                                  career_name=career_name)
@@ -173,6 +187,8 @@ class DbHandler:
                 select(Student.student_id).filter_by(dni=dni)
             )
             student_id = result.scalar_one_or_none()
+            if not student_id:
+                raise StudentDoesNotExist(f"No Student with DNI: {dni}")
             return student_id
 
     async def _get_career_id_by_name(self, name: str) -> Optional[int]:
@@ -181,6 +197,8 @@ class DbHandler:
                 select(Career.id).filter_by(name=name)
             )
             career_id = result.scalar_one_or_none()
+            if not career_id:
+                raise CareerDoesNotExist(f"No Career with name: {name}")
             return career_id
 
     async def _get_subject_id_by_name(self, name: str) -> Optional[int]:
@@ -189,16 +207,14 @@ class DbHandler:
                 select(Subject.id).filter_by(name=name)
             )
             subject_id = result.scalar_one_or_none()
+            if not subject_id:
+                raise SubjectDoesNotExist(f"No Subject with name: {name}")
             return subject_id
 
     async def _get_student_career_id(self, dni: str, career_name: str) -> Optional[int]:
         async with self._SessionLocal() as session:
             student_id = await self._get_student_id_by_dni(dni)
-            if student_id is None:
-                return None
             career_id = await self._get_career_id_by_name(career_name)
-            if career_id is None:
-                return None
             result = await session.execute(
                 select(StudentCareer.id).filter_by(
                     student_id=student_id,
@@ -206,16 +222,14 @@ class DbHandler:
                 )
             )
             student_career_id = result.scalar_one_or_none()
+            if not student_career_id:
+                raise UnenrolledStudent(f"Student in not enrolled in the career: {career_name}")
             return student_career_id
 
     async def _get_career_subject_id(self, career_name: str, subject_name: str) -> Optional[int]:
         async with self._SessionLocal() as session:
             career_id = await self._get_career_id_by_name(career_name)
-            if career_id is None:
-                return None
             subject_id = await self._get_subject_id_by_name(subject_name)
-            if subject_id is None:
-                return None
             result = await session.execute(
                 select(CareerSubject.id).filter_by(
                     career_id=career_id,
@@ -223,6 +237,8 @@ class DbHandler:
                 )
             )
             career_subject_id = result.scalar_one_or_none()
+            if not career_subject_id:
+                raise CareerSubjectDoesNotExist(f"{subject_name} is not related with {career_name}")
             return career_subject_id
 
     async def _get_subject_enrollment_id(self,
@@ -232,11 +248,7 @@ class DbHandler:
                                          ) -> Optional[int]:
         async with self._SessionLocal() as session:
             student_career_id = await self._get_student_career_id(dni, career_name)
-            if student_career_id is None:
-                return None
             career_subject_id = await self._get_career_subject_id(career_name, subject_name)
-            if career_subject_id is None:
-                return None
             result = await session.execute(
                 select(SubjectEnrollment.id).filter_by(
                     student_id=student_career_id,
@@ -244,4 +256,6 @@ class DbHandler:
                 )
             )
             subject_enrollment_id = result.scalar_one_or_none()
+            if not subject_enrollment_id:
+                raise UnenrolledStudent(f"Student in not enrolled in the subject: {subject_name}")
             return subject_enrollment_id
