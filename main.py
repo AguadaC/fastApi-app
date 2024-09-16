@@ -4,12 +4,17 @@
 import uvicorn
 
 from fastapi import FastAPI
+from fastapi.exceptions import RequestValidationError
 from typing import AsyncIterator
 
 from challenge import constants
 from challenge.api import api_leads, api_enroll
 from challenge.core.log_manager import LogManager
-
+from challenge.utils.error_management import (
+    unexpected_error_handler,
+    data_type_error_request,
+    connection_refused_error
+)
 
 #Lifespan events
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
@@ -51,6 +56,9 @@ app.include_router(api_leads.router, prefix="/leads", tags=["leads"])
 app.include_router(api_enroll.router, prefix="/enroll", tags=["enroll"])
 
 # Response exceptions Handlers
+app.add_exception_handler(ConnectionRefusedError, connection_refused_error)
+app.add_exception_handler(RequestValidationError, data_type_error_request)
+app.add_exception_handler(Exception, unexpected_error_handler)
 
 def run_dev_server():
     """Run the server for development purposes."""
