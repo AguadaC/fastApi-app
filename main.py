@@ -56,15 +56,13 @@ app.include_router(api_leads.router, prefix="/leads", tags=["leads"])
 app.include_router(api_enroll.router, prefix="/enroll", tags=["enroll"])
 
 # Response exceptions Handlers
-app.add_exception_handler(ConnectionRefusedError, connection_refused_error)
+app.add_exception_handler(OSError, connection_refused_error)
 app.add_exception_handler(RequestValidationError, data_type_error_request)
 app.add_exception_handler(Exception, unexpected_error_handler)
 
 def run_dev_server():
     """Run the server for development purposes."""
-
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
-
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 
 if __name__ == "__main__":
     run_dev_server()
