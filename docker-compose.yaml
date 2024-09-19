@@ -1,0 +1,22 @@
+version: '3.3'
+
+services:
+  challenge:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      POSTGRES_HOST: postgres
+    depends_on:
+      - postgres
+    volumes:
+      - /opt/chanllenge/logs:/opt/chanllenge/logs
+
+  postgres:
+    image: custom-postgres-image
+    ports:
+      - "5432:5432"
+    volumes:
+      - /opt/chanllenge/data:/var/lib/postgresql/data
