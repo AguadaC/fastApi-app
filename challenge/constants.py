@@ -15,3 +15,7 @@ VERSION = "0.0.1.dev1"
 # -----------------------------------------------------------------------------
 # Exceptions
 DEFAULT_ERROR_MESSAGE = "No detail provided."
+
+# -----------------------------------------------------------------------------
+# Log Manager configuration
+LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

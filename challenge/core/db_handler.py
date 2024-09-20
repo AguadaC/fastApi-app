@@ -4,7 +4,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
-from sqlalchemy.exc import NoResultFound
 from typing import List, Optional
 
 from challenge import settings
@@ -37,9 +36,9 @@ class DbHandler:
         self._database_url = (
             'postgresql+asyncpg://'
             f'{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}'
-            f'@localhost:5432/{settings.POSTGRES_DB}'
+            f'@{settings.POSTGRES_HOST}:5432/{settings.POSTGRES_DB}'
         )
-        self._engine = create_async_engine(self._database_url, echo=settings.ECHO)
+        self._engine = create_async_engine(self._database_url, echo=settings.POSTGRES_ECHO)
         self._SessionLocal = sessionmaker(
             bind=self._engine,
             class_=AsyncSession,
@@ -66,15 +65,17 @@ class DbHandler:
         """
         async with self._SessionLocal() as session:
             async with session.begin():
-                student_id_exists = await self._get_student_id_by_dni(dni=dni)
-                if student_id_exists:
-                    raise StudentAlreadyExists(
-                        f"Student with DNI: {dni}, exists. ID record: {student_id_exists}"
-                    )
-                new_student = Student(dni=dni, name=name, email=email, phone=phone)
-                session.add(new_student)
-                await session.flush()
-                student_id = new_student.student_id
+                try:
+                    student_id_exists = await self._get_student_id_by_dni(dni=dni)
+                    if student_id_exists:
+                        raise StudentAlreadyExists(
+                            f"Student with DNI: {dni}, exists. ID record: {student_id_exists}"
+                        )
+                except StudentDoesNotExist:
+                    new_student = Student(dni=dni, name=name, email=email, phone=phone)
+                    session.add(new_student)
+                    await session.flush()
+                    student_id = new_student.student_id
             await session.commit()
         return student_id
 
