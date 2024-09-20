@@ -4,7 +4,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.future import select
-from sqlalchemy.exc import NoResultFound
 from typing import List, Optional
 
 from challenge import settings
@@ -39,7 +38,7 @@ class DbHandler:
             f'{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}'
             f'@{settings.POSTGRES_HOST}:5432/{settings.POSTGRES_DB}'
         )
-        self._engine = create_async_engine(self._database_url, echo=settings.ECHO)
+        self._engine = create_async_engine(self._database_url, echo=settings.POSTGRES_ECHO)
         self._SessionLocal = sessionmaker(
             bind=self._engine,
             class_=AsyncSession,

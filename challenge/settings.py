@@ -18,8 +18,4 @@ POSTGRES_USER     = os.environ.get("POSTGRES_USER", "postgres")
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "postgres")
 POSTGRES_DB       = os.environ.get("POSTGRES_DB", "challenge_db")
 POSTGRES_HOST     = os.environ.get("POSTGRES_HOST", "localhost")
-ECHO              = os.environ.get("ECHO", True)
-
-# -----------------------------------------------------------------------------
-# Log Manager configuration
-LOG_FORMAT = os.environ.get("LOG_FORMAT", "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+POSTGRES_ECHO     = os.environ.get("ECHO", "false").lower() in ('true', '1', 't')
