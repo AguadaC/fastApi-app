@@ -2,8 +2,7 @@
 """SQL Models module."""
 
 from sqlalchemy import Column, String, Integer, ForeignKey, TIMESTAMP
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, declarative_base
 from sqlalchemy.sql import func
 
 

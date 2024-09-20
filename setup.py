@@ -2,7 +2,6 @@
 """Setup file"""
 
 import os
-import sys
 from typing import Dict
 from setuptools import setup, find_packages
 
@@ -27,12 +26,6 @@ if os.path.exists(requirements_file):
     with open(requirements_file) as fp:
         unit_deps = fp.readlines()
 
-test_deps = []
-requirements_test_file = os.path.join(here, "requirements-test.txt")
-if os.path.exists(requirements_test_file):
-    with open(requirements_test_file) as fp:
-        test_deps = fp.readlines()
-
 setup(
     name=NAME,
     version=version["__version__"],
@@ -43,7 +36,7 @@ setup(
     description=DESCRIPTION,
     long_description="Application to manage lead in a DB",
     long_description_content_type="text/markdown",
-    packages=find_packages(),
+    packages=find_packages(exclude=["tests*"]),
     include_package_data=True,
     platforms="any",
     classifiers=[
@@ -57,8 +50,6 @@ setup(
     ],
     scripts=SCRIPT,
     install_requires=unit_deps,
-    tests_require=test_deps,
-    setup_requires=["pytest-runner"] if "test" in sys.argv else [],
     entry_points={
         "console_scripts": [
             f"{NAME} = main:run_dev_server",

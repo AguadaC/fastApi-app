@@ -6,9 +6,10 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
 from typing import AsyncIterator
+from contextlib import asynccontextmanager
 
 from challenge import constants
-from challenge.api import api_leads, api_enroll
+from challenge.api import api_leads, api_enroll, api_root
 from challenge.core.log_manager import LogManager
 from challenge.utils.error_management import (
     unexpected_error_handler,
@@ -17,6 +18,7 @@ from challenge.utils.error_management import (
 )
 
 #Lifespan events
+@asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """Manages the lifecycle of the FastAPI application.
 
@@ -52,6 +54,7 @@ app.version = constants.VERSION
 app.contact = constants.CONTACT
 
 # Include all APIs routers
+app.include_router(api_root.router, tags=["root"])
 app.include_router(api_leads.router, prefix="/leads", tags=["leads"])
 app.include_router(api_enroll.router, prefix="/enroll", tags=["enroll"])
 

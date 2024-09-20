@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """API Models module."""
 
-from pydantic import BaseModel
-from typing import List
+from pydantic import BaseModel, ConfigDict
 
 
 class CreateLeadModel(BaseModel):
@@ -30,27 +29,26 @@ class ResponseLead(BaseModel):
     name: str
     email: str
     phone: str
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ResponseLeadId(BaseModel):
     """Created Student's Id"""
     student_id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ResponseStudentCareer(BaseModel):
     """Created Student's Id"""
     id: int
-
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class ResponseSubjectEnroll(BaseModel):
     """Subject enrollment Id"""
     id: int
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attributes = True
+class WelcomeModel(BaseModel):
+    """Model for root path"""
+
+    title: str
+    detail: str
+    docs: str
