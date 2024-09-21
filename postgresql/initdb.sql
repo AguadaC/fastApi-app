@@ -5,6 +5,7 @@ CREATE TABLE students (
     name VARCHAR(100) NOT NULL,               -- Name of the student
     email VARCHAR(100),                       -- Optional email of the student
     phone VARCHAR(20),                        -- Optional phone number of the student
+    address VARCHAR(50),                      -- Opcional address of the student
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Automatically set date when record is created
 );
 
@@ -17,7 +18,8 @@ CREATE TABLE careers (
 -- Table for Subjects
 CREATE TABLE subjects (
     id SERIAL PRIMARY KEY,            -- Auto-incremental ID, used as the primary key
-    name VARCHAR(100) NOT NULL        -- Name of the subject
+    name VARCHAR(100) NOT NULL,       -- Name of the subject
+    class_duration INT                -- Duration for class in hours
 );
 
 -- Table for the many-to-many relationship between Students and Careers
@@ -25,6 +27,7 @@ CREATE TABLE student_career (
     id SERIAL PRIMARY KEY,
     student_id INT NOT NULL,
     career_id INT NOT NULL,
+    year_enroll INT,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,  -- References the student's ID
     FOREIGN KEY (career_id) REFERENCES careers(id) ON DELETE CASCADE,            -- References the career's ID
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP                                     -- Automatically set date when record is created
@@ -44,6 +47,7 @@ CREATE TABLE subject_enrollments (
     id SERIAL PRIMARY KEY,
     student_id INT NOT NULL,                                                        -- References the student's ID
     career_subject_id INT NOT NULL,                                                 -- Composite key for career and subject
+    enroll_times INT,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,                                       -- Automatically set date when record is created
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,             
     FOREIGN KEY (career_subject_id) REFERENCES career_subject(id) ON DELETE CASCADE -- Foreign key constraint
@@ -57,12 +61,12 @@ INSERT INTO students (dni, name, email, phone) VALUES
 ('45678901', 'David Brown', 'david.brown@example.com', '555-4444');
 
 -- Create 5 basic subjects
-INSERT INTO subjects (name) VALUES
-('mathematics'),
-('physics'),
-('chemistry'),
-('biology'),
-('computer_science');
+INSERT INTO subjects (name, class_duration) VALUES
+('mathematics', 6),
+('physics', 5),
+('chemistry', 3),
+('biology', 4),
+('computer_science', 5);
 
 -- Create 3 careers
 INSERT INTO careers (name) VALUES
@@ -72,19 +76,19 @@ INSERT INTO careers (name) VALUES
 
 -- Create 2 specialized subjects for each career
 -- electrical_engineering
-INSERT INTO subjects (name) VALUES
-('electronic_circuits'),
-('digital_systems');
+INSERT INTO subjects (name, class_duration) VALUES
+('electronic_circuits', 3),
+('digital_systems', 6);
 
 -- civil_engineering
-INSERT INTO subjects (name) VALUES
-('structural_analysis'),
-('geotechnical_engineering');
+INSERT INTO subjects (name, class_duration) VALUES
+('structural_analysis', 5),
+('geotechnical_engineering', 4);
 
 -- chemical_engineering
-INSERT INTO subjects (name) VALUES
-('organic_chemistry'),
-('inorganic_chemistry');
+INSERT INTO subjects (name, class_duration) VALUES
+('organic_chemistry', 3),
+('inorganic_chemistry', 4);
 
 -- Relate electrical_engineering to its specialized subjects
 INSERT INTO career_subject (career_id, subject_id) VALUES
