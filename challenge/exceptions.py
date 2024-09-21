@@ -50,3 +50,7 @@ class SubjectDoesNotExist(BaseError):
 class CareerSubjectDoesNotExist(BaseError):
     """Exception that occurs when the subject and the career are not related"""
     pass
+
+class EnrollRecordDoesNotExist(BaseError):
+    """Exception that occurs when the enroll record does not exist"""
+    pass
