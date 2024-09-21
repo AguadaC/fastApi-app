@@ -17,6 +17,7 @@ class Student(Base):
     name = Column(String(100), nullable=False)
     email = Column(String(100), nullable=True)
     phone = Column(String(20), nullable=True)
+    address = Column(String(50), nullable=True)
     date = Column(TIMESTAMP, server_default=func.now())
 
     careers = relationship('StudentCareer', back_populates='student', cascade='all, delete-orphan')
@@ -39,7 +40,7 @@ class Subject(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False)
-
+    class_duration = Column(Integer, nullable=True)
 
     careers = relationship('CareerSubject', back_populates='subject', cascade='all, delete-orphan')
 
@@ -50,6 +51,7 @@ class StudentCareer(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     student_id = Column(Integer, ForeignKey('students.student_id', ondelete='CASCADE'), primary_key=True)
     career_id = Column(Integer, ForeignKey('careers.id', ondelete='CASCADE'), primary_key=True)
+    year_enroll =  Column(Integer, nullable=True)
     date = Column(TIMESTAMP, server_default=func.now())
 
     student = relationship('Student', back_populates='careers')
@@ -74,6 +76,7 @@ class SubjectEnrollment(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     student_id = Column(Integer, ForeignKey('students.student_id', ondelete='CASCADE'), nullable=False)
     career_subject_id = Column(Integer, ForeignKey('career_subject.id', ondelete='CASCADE'), nullable=False)
+    enroll_times = Column(Integer, nullable=True)
     date = Column(TIMESTAMP, server_default=func.now())
 
     career_subject = relationship('CareerSubject', back_populates='enrollments')
