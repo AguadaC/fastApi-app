@@ -7,6 +7,8 @@ from typing import List
 from challenge.models.api_models import (CreateLeadModel,
                                          ResponseLeadId,
                                          ResponseLead)
+from challenge.exceptions import (StudentDoesNotExist,
+                                  StudentAlreadyExists)
 from challenge.core.db_handler import DbHandler
 
 
@@ -23,19 +25,28 @@ async def create_lead(lead: CreateLeadModel, request: Request):
             - name (str): The name of the lead.
             - email (Optional[str]): The optional email of the lead.
             - phone (Optional[str]): The optional phone number of the lead.
+            - address (Optional[str]): The optional address of the lead.
         request (Request): The FastAPI request object, used for logging.
 
     Returns:
         dict: A dictionary containing the ID of the created lead. For example:
-            - {"student_id": <ID>}
+
+    Raise:
+        StudentAlreadyExists: When the student exists.
     """
     logger = request.app.logger
     logger.info("Creating lead...")
     db_handler = DbHandler()
-    lead_in_db = await db_handler.create_student(dni=lead.dni,
-                                                 name=lead.name,
-                                                 email=lead.email,
-                                                 phone=lead.phone)
+    try:
+        lead_in_db = await db_handler._get_student_id_by_dni(dni=lead.dni)
+        raise StudentAlreadyExists(
+                    f"Student with DNI: {lead.dni}, exists. ID record: {lead_in_db}"
+              )
+    except StudentDoesNotExist:
+        lead_in_db = await db_handler.create_student(dni=lead.dni,
+                                                    name=lead.name,
+                                                    email=lead.email,
+                                                    phone=lead.phone)
     logger.info(f"Lead {lead_in_db} created sucessfully")
     return {"student_id": lead_in_db}
 

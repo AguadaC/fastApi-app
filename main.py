@@ -9,7 +9,10 @@ from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
 from challenge import constants
-from challenge.api import api_leads, api_enroll, api_root
+from challenge.api import (api_main,
+                           api_leads,
+                           api_enroll,
+                           api_root)
 from challenge.core.log_manager import LogManager
 from challenge.utils.error_management import (
     unexpected_error_handler,
@@ -57,6 +60,7 @@ app.contact = constants.CONTACT
 app.include_router(api_root.router, tags=["root"])
 app.include_router(api_leads.router, prefix="/leads", tags=["leads"])
 app.include_router(api_enroll.router, prefix="/enroll", tags=["enroll"])
+app.include_router(api_main.router, prefix="/main", tags=["main"])
 
 # Response exceptions Handlers
 app.add_exception_handler(OSError, connection_refused_error)
