@@ -19,7 +19,9 @@ services:
       - /opt/chanllenge/logs:/opt/chanllenge/logs
 
   postgres:
-    image: custom-postgres-image
+    build:
+      context: postgresql
+      dockerfile: Dockerfile
     ports:
       - "5432:5432"
     volumes:
