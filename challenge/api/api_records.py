@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""API main module"""
+"""API record module"""
 
 from fastapi import APIRouter, Request, Path, Query
 from typing import List
