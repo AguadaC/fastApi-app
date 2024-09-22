@@ -16,7 +16,7 @@ class ServiceTests(unittest.TestCase):
     def test_get_root(self):
         """Test request to the root endpoint"""
         with TestClient(app) as client:
-            response = client.get(f"{self.root}")
+            response = client.get(self.root)
             assert response.status_code == status.HTTP_200_OK
             assert (
                 response.json()["title"]

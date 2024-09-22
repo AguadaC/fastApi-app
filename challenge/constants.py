@@ -19,3 +19,8 @@ DEFAULT_ERROR_MESSAGE = "No detail provided."
 # -----------------------------------------------------------------------------
 # Log Manager configuration
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+# -----------------------------------------------------------------------------
+# Errors configuration
+DATA_INVALID = "Data type on request body: invalid"
+CONNECTIO_ISSUE = "Connection issues with the database. Postgres database is DOWN"
