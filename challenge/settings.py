@@ -4,15 +4,15 @@
 import os
 
 
-# -----------------------------------------------------------------------------
+# ==================================================================================
 # Unit particular configurations
 LOG_DIR = os.environ.get("LOG_DIR", "/opt/chanllenge/logs/")
 
-# -----------------------------------------------------------------------------
+# ==================================================================================
 # Unit internal configurations
 DEBUG = os.environ.get("DEBUG", True)
 
-# -----------------------------------------------------------------------------
+# ==================================================================================
 # Data Base configurations
 POSTGRES_USER     = os.environ.get("POSTGRES_USER", "postgres")
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "postgres")

@@ -3,9 +3,9 @@ CREATE TABLE students (
     student_id SERIAL PRIMARY KEY,            -- Auto-incremental ID, used as the primary key
     dni VARCHAR(20) NOT NULL,                 -- DNI of the student
     name VARCHAR(100) NOT NULL,               -- Name of the student
-    email VARCHAR(100),                       -- Optional email of the student
-    phone VARCHAR(20),                        -- Optional phone number of the student
-    address VARCHAR(50),                      -- Opcional address of the student
+    email VARCHAR(100) NOT NULL,              -- Email of the student
+    phone VARCHAR(20) NOT NULL,               -- Phone number of the student
+    address VARCHAR(50) NOT NULL,             -- Address of the student
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Automatically set date when record is created
 );
 
@@ -19,7 +19,7 @@ CREATE TABLE careers (
 CREATE TABLE subjects (
     id SERIAL PRIMARY KEY,            -- Auto-incremental ID, used as the primary key
     name VARCHAR(100) NOT NULL,       -- Name of the subject
-    class_duration INT                -- Duration for class in hours
+    class_duration INT NOT NULL       -- Duration for class in hours
 );
 
 -- Table for the many-to-many relationship between Students and Careers
@@ -27,7 +27,7 @@ CREATE TABLE student_career (
     id SERIAL PRIMARY KEY,
     student_id INT NOT NULL,
     career_id INT NOT NULL,
-    year_enroll INT,
+    year_enroll INT NOT NULL,
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,  -- References the student's ID
     FOREIGN KEY (career_id) REFERENCES careers(id) ON DELETE CASCADE,            -- References the career's ID
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP                                     -- Automatically set date when record is created
@@ -47,18 +47,18 @@ CREATE TABLE subject_enrollments (
     id SERIAL PRIMARY KEY,
     student_id INT NOT NULL,                                                        -- References the student's ID
     career_subject_id INT NOT NULL,                                                 -- Composite key for career and subject
-    enroll_times INT,
+    enroll_times INT NOT NULL,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,                                       -- Automatically set date when record is created
     FOREIGN KEY (student_id) REFERENCES students(student_id) ON DELETE CASCADE,             
     FOREIGN KEY (career_subject_id) REFERENCES career_subject(id) ON DELETE CASCADE -- Foreign key constraint
 );
 
 -- Insert 4 students
-INSERT INTO students (dni, name, email, phone) VALUES
-('12345678', 'Alice Smith', 'alice.smith@example.com', '555-1111'),
-('23456789', 'Bob Johnson', 'bob.johnson@example.com', '555-2222'),
-('34567890', 'Carol Williams', 'carol.williams@example.com', '555-3333'),
-('45678901', 'David Brown', 'david.brown@example.com', '555-4444');
+INSERT INTO students (dni, name, email, phone, address) VALUES
+('12345678', 'Alice Smith', 'alice.smith@example.com', '555-1111', 'Address 123'),
+('23456789', 'Bob Johnson', 'bob.johnson@example.com', '555-2222', 'Address 234'),
+('34567890', 'Carol Williams', 'carol.williams@example.com', '555-3333', 'Address 345'),
+('45678901', 'David Brown', 'david.brown@example.com', '555-4444', 'Address 456');
 
 -- Create 5 basic subjects
 INSERT INTO subjects (name, class_duration) VALUES

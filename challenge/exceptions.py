@@ -23,7 +23,7 @@ class StudentDoesNotExist(BaseError):
 
 
 class StudentCareerEnroll(BaseError):
-    """Exception that occurs when the student is enrolled in the career"""
+    """Exception that occurs when the student is already enrolled in the career"""
     pass
 
 
@@ -33,16 +33,19 @@ class UnenrolledStudent(BaseError):
 
 
 class CareerDoesNotExist(BaseError):
-    """Exception that occurs when the career does not exist"""
+    """Exception that occurs when the requested career does not exist"""
     pass
 
+
 class SubjectDoesNotExist(BaseError):
-    """Exception that occurs when the subject does not exist"""
+    """Exception that occurs when the requested subject does not exist"""
     pass
+
 
 class CareerSubjectDoesNotExist(BaseError):
     """Exception that occurs when the subject and the career are not related"""
     pass
+
 
 class EnrollRecordDoesNotExist(BaseError):
     """Exception that occurs when the enroll record does not exist"""

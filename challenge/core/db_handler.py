@@ -22,6 +22,7 @@ from challenge.models.sql_models import (Student,
                                          SubjectEnrollment)
 from challenge.models.api_models import RetriveLeadRecord
 
+
 logger = LogManager().logger()
 
 class DbHandler:
@@ -44,7 +45,9 @@ class DbHandler:
             expire_on_commit=False
         )
 
-    async def create_student(self,
+#==============================================================================
+# Methods for Students querys
+    async def _create_student(self,
                              dni: str,
                              name: str,
                              email: Optional[str] = None,
@@ -77,7 +80,7 @@ class DbHandler:
             await session.commit()
         return student_id
 
-    async def get_all_students(self) -> List[Student]:
+    async def _get_all_students(self) -> List[Student]:
         """
         Retrieve all student records from the database.
 
@@ -91,7 +94,7 @@ class DbHandler:
                 query_list.append(student_tuple[0])
         return query_list
 
-    async def get_student_by_id(self, student_id) -> Student:
+    async def _get_student_by_id(self, student_id) -> Student:
         """
         Retrieve a student record by its unique ID.
 
@@ -113,7 +116,121 @@ class DbHandler:
                 raise StudentDoesNotExist(f"No Student with ID: {student_id}")
         return student
 
-    async def enroll_student_in_a_career(self,
+    async def _get_student_id_by_dni(self, dni: str) -> Optional[int]:
+        """
+        Retrieve the unique identifier of a student based on their DNI (National Identity Document).
+
+        Args:
+            dni (str): The DNI of the student whose ID is to be retrieved.
+
+        Returns:
+            Optional[int]: The unique identifier of the student if found; otherwise, raises an exception.
+
+        Raises:
+            StudentDoesNotExist: If no student with the given DNI exists in the database.
+        """
+        async with self._SessionLocal() as session:
+            result = await session.execute(
+                select(Student.student_id).filter_by(dni=dni)
+            )
+            student_id = result.scalar_one_or_none()
+            if not student_id:
+                raise StudentDoesNotExist(f"No Student with DNI: {dni}")
+            return student_id
+
+#==============================================================================
+# Methods for Careers querys
+    async def _get_career_by_id(self,
+                                id: int,
+                                ) -> Optional[Career]:
+        """
+        Retrieve a career record by its ID.
+
+        Args:
+            id (int): The ID of the career record to retrieve.
+
+        Returns:
+            Optional[Career]: The career record if found; otherwise, returns None.
+        """
+        async with self._SessionLocal() as session:
+            result = await session.execute(
+                select(Career).where(
+                    Career.id == id
+                )
+            )
+            carrer= result.scalars().first()
+            return carrer
+
+    async def _get_career_id_by_name(self, name: str) -> Optional[int]:
+        """
+        Retrieve the ID of a career based on its name.
+
+        Args:
+            name (str): The name of the career to search for.
+
+        Returns:
+            Optional[int]: The ID of the career if found.
+        
+        Raises:
+            CareerDoesNotExist: If no career with the specified name is found in the database.
+        """
+        async with self._SessionLocal() as session:
+            result = await session.execute(
+                select(Career.id).filter_by(name=name)
+            )
+            career_id = result.scalar_one_or_none()
+            if not career_id:
+                raise CareerDoesNotExist(f"No Career with name: {name}")
+            return career_id
+
+#==============================================================================
+# Methods for Subjects querys
+    async def _get_subject_by_id(self,
+                                id: int,
+                                ) -> Optional[Subject]:
+        """
+        Retrieve a subject record by its ID.
+
+        Args:
+            id (int): The ID of the subject record to retrieve.
+
+        Returns:
+            Optional[Subject]: The subject record if found; otherwise, returns None.
+        """
+        async with self._SessionLocal() as session:
+            result = await session.execute(
+                select(Subject).where(
+                    Subject.id == id
+                )
+            )
+            subject= result.scalars().first()
+            return subject
+
+    async def _get_subject_id_by_name(self, subject_name: str) -> Optional[int]:
+        """
+        Retrieve the ID of a subject based on its name.
+
+        Args:
+            subject_name (str): The name of the subject to search for.
+
+        Returns:
+            Optional[int]: The ID of the subject if found.
+        
+        Raises:
+            SubjectDoesNotExist: If no subject with the specified name is found in the database.
+        """
+        async with self._SessionLocal() as session:
+            result = await session.execute(
+                select(Subject.id).filter_by(name=subject_name)
+            )
+            subject_id = result.scalar_one_or_none()
+            if not subject_id:
+                raise SubjectDoesNotExist(f"No Subject with name: {subject_name}")
+            return subject_id
+
+#==============================================================================
+# Methods for Student-Career querys
+    async def _enroll_student_in_a_career(self,
                                          student_id: int,
                                          career_id: int,
                                          year_enroll: int) -> int:
@@ -139,100 +256,57 @@ class DbHandler:
             await session.commit()
             return enrollment_id
 
-    async def enroll_student_in_a_subject(self,
-                                          student_id: int,
-                                          career_subject_id: int,
-                                          enroll_times: int
-                                          ) -> int:
+    async def _get_student_career_by_ids(self,
+                                        student_id: int,
+                                        career_id: int,
+                                        ) -> Optional[StudentCareer]:
         """
-        Enroll a student in a specific subject for a given number of enrollments.
+        Retrieve a student's career record by student ID and career ID.
 
         Args:
-            student_id (int): The unique identifier of the student to enroll.
-            career_subject_id (int): The unique identifier of the career subject the student is enrolling in.
-            enroll_times (int): The number of times the student is enrolling in the subject.
+            student_id (int): The ID of the student.
+            career_id (int): The ID of the career.
 
         Returns:
-            int: The unique identifier of the newly created subject enrollment record.
+            Optional[StudentCareer]: The student's career record if found; otherwise, raises UnenrolledStudent.
+        
+        Raises:
+            UnenrolledStudent: If the student is not enrolled in the specified career.
         """
         async with self._SessionLocal() as session:
-            async with session.begin():
-                new_enrollment = SubjectEnrollment(
-                    student_id=student_id,
-                    career_subject_id=career_subject_id,
-                    enroll_times = enroll_times
+            result = await session.execute(
+                select(StudentCareer).where(
+                    StudentCareer.student_id == student_id,
+                    StudentCareer.career_id == career_id
                 )
-                session.add(new_enrollment)
-                await session.flush()
-                enrollment_id = new_enrollment.id
-            await session.commit()
-            return enrollment_id
+            )
+            student_career = result.scalar_one_or_none()
+            if not student_career:
+                raise UnenrolledStudent(f"Student in not enrolled in the subject")
+            return student_career
 
-    async def _get_student_id_by_dni(self, dni: str) -> Optional[int]:
+#==============================================================================
+# Methods for Career-Subject querys
+    async def _get_career_subject_by_id(self,
+                                         id: int,
+                                         ) -> Optional[CareerSubject]:
         """
-        Retrieve the unique identifier of a student based on their DNI (National Identity Document).
+        Retrieve a career-subject relationship record by its ID.
 
         Args:
-            dni (str): The DNI of the student whose ID is to be retrieved.
+            id (int): The ID of the career-subject record to retrieve.
 
         Returns:
-            Optional[int]: The unique identifier of the student if found; otherwise, raises an exception.
-
-        Raises:
-            StudentDoesNotExist: If no student with the given DNI exists in the database.
+            Optional[CareerSubject]: The career-subject record if found; otherwise, returns None.
         """
         async with self._SessionLocal() as session:
             result = await session.execute(
-                select(Student.student_id).filter_by(dni=dni)
+                select(CareerSubject).where(
+                    CareerSubject.id == id
+                )
             )
-            student_id = result.scalar_one_or_none()
-            if not student_id:
-                raise StudentDoesNotExist(f"No Student with DNI: {dni}")
-            return student_id
-
-    async def _get_career_id_by_name(self, name: str) -> Optional[int]:
-        """
-        Retrieve the ID of a career based on its name.
-
-        Args:
-            name (str): The name of the career to search for.
-
-        Returns:
-            Optional[int]: The ID of the career if found.
-        
-        Raises:
-            CareerDoesNotExist: If no career with the specified name is found in the database.
-        """
-        async with self._SessionLocal() as session:
-            result = await session.execute(
-                select(Career.id).filter_by(name=name)
-            )
-            career_id = result.scalar_one_or_none()
-            if not career_id:
-                raise CareerDoesNotExist(f"No Career with name: {name}")
-            return career_id
-
-    async def _get_subject_id_by_name(self, subject_name: str) -> Optional[int]:
-        """
-        Retrieve the ID of a subject based on its name.
-
-        Args:
-            subject_name (str): The name of the subject to search for.
-
-        Returns:
-            Optional[int]: The ID of the subject if found.
-        
-        Raises:
-            SubjectDoesNotExist: If no subject with the specified name is found in the database.
-        """
-        async with self._SessionLocal() as session:
-            result = await session.execute(
-                select(Subject.id).filter_by(name=subject_name)
-            )
-            subject_id = result.scalar_one_or_none()
-            if not subject_id:
-                raise SubjectDoesNotExist(f"No Subject with name: {subject_name}")
-            return subject_id
+            carrer_subject= result.scalars().first()
+            return carrer_subject
 
     async def _get_career_subject_id(self,
                                      career_id: int,
@@ -262,6 +336,62 @@ class DbHandler:
             if not career_subject_id:
                 raise CareerSubjectDoesNotExist(f"Subject is not related with the career.")
             return career_subject_id
+
+#==============================================================================
+# Methods for Student-Career-Subject querys
+    async def _enroll_student_in_a_subject(self,
+                                          student_id: int,
+                                          career_subject_id: int,
+                                          enroll_times: int
+                                          ) -> int:
+        """
+        Enroll a student in a specific subject for a given number of enrollments.
+
+        Args:
+            student_id (int): The unique identifier of the student to enroll.
+            career_subject_id (int): The unique identifier of the career subject the student is enrolling in.
+            enroll_times (int): The number of times the student is enrolling in the subject.
+
+        Returns:
+            int: The unique identifier of the newly created subject enrollment record.
+        """
+        async with self._SessionLocal() as session:
+            async with session.begin():
+                new_enrollment = SubjectEnrollment(
+                    student_id=student_id,
+                    career_subject_id=career_subject_id,
+                    enroll_times = enroll_times
+                )
+                session.add(new_enrollment)
+                await session.flush()
+                enrollment_id = new_enrollment.id
+            await session.commit()
+            return enrollment_id
+
+    async def _get_subject_enrollment_by_id(self,
+                                         id: int,
+                                         ) -> Optional[SubjectEnrollment]:
+        """
+        Retrieve a subject enrollment record by its ID.
+
+        Args:
+            id (int): The ID of the subject enrollment record to retrieve.
+
+        Returns:
+            Optional[SubjectEnrollment]: The subject enrollment record if found.
+        Raises:
+            EnrollRecordDoesNotExist: If no subject enrollment record exists for the specified ID.
+        """
+        async with self._SessionLocal() as session:
+            result = await session.execute(
+                select(SubjectEnrollment).where(
+                    SubjectEnrollment.id == id
+                )
+            )
+            subject_enrollment = result.scalars().first()
+            if not subject_enrollment:
+                raise EnrollRecordDoesNotExist(f"Record with ID:{id} does not exist")
+            return subject_enrollment
 
     async def _get_subject_enrollment_id(self,
                                          student_id: int,
@@ -294,123 +424,6 @@ class DbHandler:
             if not subject_enrollment_id:
                 raise UnenrolledStudent(f"Student in not enrolled in the subject")
             return subject_enrollment_id
-    
-    async def _get_subject_enrollment_by_id(self,
-                                         id: int,
-                                         ) -> Optional[SubjectEnrollment]:
-        """
-        Retrieve a subject enrollment record by its ID.
-
-        Args:
-            id (int): The ID of the subject enrollment record to retrieve.
-
-        Returns:
-            Optional[SubjectEnrollment]: The subject enrollment record if found.
-        Raises:
-            EnrollRecordDoesNotExist: If no subject enrollment record exists for the specified ID.
-        """
-        async with self._SessionLocal() as session:
-            result = await session.execute(
-                select(SubjectEnrollment).where(
-                    SubjectEnrollment.id == id
-                )
-            )
-            subject_enrollment = result.scalars().first()
-            if not subject_enrollment:
-                raise EnrollRecordDoesNotExist(f"Record with ID:{id} does not exist")
-            return subject_enrollment
-
-    async def _get_career_subject_by_id(self,
-                                         id: int,
-                                         ) -> Optional[CareerSubject]:
-        """
-        Retrieve a career-subject relationship record by its ID.
-
-        Args:
-            id (int): The ID of the career-subject record to retrieve.
-
-        Returns:
-            Optional[CareerSubject]: The career-subject record if found; otherwise, returns None.
-        """
-        async with self._SessionLocal() as session:
-            result = await session.execute(
-                select(CareerSubject).where(
-                    CareerSubject.id == id
-                )
-            )
-            carrer_subject= result.scalars().first()
-            return carrer_subject
-
-    async def _get_career_by_id(self,
-                                id: int,
-                                ) -> Optional[Career]:
-        """
-        Retrieve a career record by its ID.
-
-        Args:
-            id (int): The ID of the career record to retrieve.
-
-        Returns:
-            Optional[Career]: The career record if found; otherwise, returns None.
-        """
-        async with self._SessionLocal() as session:
-            result = await session.execute(
-                select(Career).where(
-                    Career.id == id
-                )
-            )
-            carrer= result.scalars().first()
-            return carrer
-
-    async def _get_subject_by_id(self,
-                                id: int,
-                                ) -> Optional[Subject]:
-        """
-        Retrieve a subject record by its ID.
-
-        Args:
-            id (int): The ID of the subject record to retrieve.
-
-        Returns:
-            Optional[Subject]: The subject record if found; otherwise, returns None.
-        """
-        async with self._SessionLocal() as session:
-            result = await session.execute(
-                select(Subject).where(
-                    Subject.id == id
-                )
-            )
-            subject= result.scalars().first()
-            return subject
-
-    async def _get_student_career_by_ids(self,
-                                        student_id: int,
-                                        career_id: int,
-                                        ) -> Optional[StudentCareer]:
-        """
-        Retrieve a student's career record by student ID and career ID.
-
-        Args:
-            student_id (int): The ID of the student.
-            career_id (int): The ID of the career.
-
-        Returns:
-            Optional[StudentCareer]: The student's career record if found; otherwise, raises UnenrolledStudent.
-        
-        Raises:
-            UnenrolledStudent: If the student is not enrolled in the specified career.
-        """
-        async with self._SessionLocal() as session:
-            result = await session.execute(
-                select(StudentCareer).where(
-                    StudentCareer.student_id == student_id,
-                    StudentCareer.career_id == career_id
-                )
-            )
-            student_career = result.scalar_one_or_none()
-            if not student_career:
-                raise UnenrolledStudent(f"Student in not enrolled in the subject")
-            return student_career
 
     async def _get_all_record_ids(self) -> List[SubjectEnrollment]:
         """
@@ -447,7 +460,7 @@ class DbHandler:
             and enrollment information.
         """
         record = await self._get_subject_enrollment_by_id(id=record_id)
-        student_obj = await self.get_student_by_id(record.student_id)
+        student_obj = await self._get_student_by_id(record.student_id)
         career_subject_obj = await self._get_career_subject_by_id(record.career_subject_id)
         career_obj = await self._get_career_by_id(career_subject_obj.career_id)
         student_career_obj = await self._get_student_career_by_ids(student_obj.student_id,

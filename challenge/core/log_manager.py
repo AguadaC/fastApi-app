@@ -4,7 +4,6 @@
 import logging
 import logging.config
 import datetime
-
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 
@@ -24,7 +23,6 @@ class LogManager(metaclass=Singleton):
 
     def __init__(self) -> None:
         """Initializes the LogManager instance."""
-
         super().__init__()
         self._log_dir=settings.LOG_DIR
         self._timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -36,7 +34,6 @@ class LogManager(metaclass=Singleton):
 
     def _initialize_logger(self) -> None:
         """Configures the logger"""
-
         logging.basicConfig(
             level  = self._log_level,
             format = constants.LOG_FORMAT
@@ -50,11 +47,9 @@ class LogManager(metaclass=Singleton):
 
     def logger(self) -> logging.Logger:
         """Returns the configured logger instance."""
-
         return self._logger
 
     @staticmethod
     def _create_log_dir_if_does_not_exist() -> None:
-        """Creates the log directory if it does not already exist."""
-
+        """Creates the log directory if it does not already exist"""
         Path(settings.LOG_DIR).mkdir(parents=True, exist_ok=True)

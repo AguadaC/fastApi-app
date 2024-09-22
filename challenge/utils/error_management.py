@@ -7,18 +7,16 @@ from starlette import status
 from typing import Union
 from pydantic import ValidationError
 
-from challenge.exceptions import (
-    BaseError,
-)
+from challenge.exceptions import BaseError
 from challenge.core.log_manager import LogManager
+from challenge.constants import DATA_INVALID, CONNECTIO_ISSUE
 
 
 def make_response_based_in_exception(
     detail_for_client: str = "An internal error has occurred.",
     logger: LogManager = None,
     exception_raised: Union[Exception, BaseError] = None,
-    return_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR,
-):
+    return_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR):
     """
     Raise HTTP exception and log Exception raised if specified.
 
@@ -60,17 +58,24 @@ def unexpected_error_handler(request: Request, exc: Union[Exception, BaseError])
     return make_response_based_in_exception(
         detail_for_client=error_msg,
         logger=request.app.logger,
-        exception_raised=exc,
-    )
+        exception_raised=exc)
+
+def expected_error_handler(request: Request, exc: BaseError):
+    """Use BaseError raiser to report operational messages"""
+    logger = request.app.logger
+    logger.error(f"Exception triggerd {exc.message}")
+    return JSONResponse(
+        status_code=status.HTTP_303_SEE_OTHER,
+        content={"detail": exc.message})
 
 def data_type_error_request(request: Request, exc: ValidationError):
     """Use RequestValidationError raiser to report Invalid data type"""
     return JSONResponse(
         status_code=status.HTTP_406_NOT_ACCEPTABLE,
-        content='Data type on request body: invalid')
+        content=DATA_INVALID)
 
 def connection_refused_error(request: Request, exc:ConnectionRefusedError):
     """Use ConnectionRefusedError raiser to report connection issues with the database"""
     return JSONResponse(
         status_code=status.HTTP_428_PRECONDITION_REQUIRED,
-        content='Connection issues with the database. Postgres database is DOWN')
+        content=CONNECTIO_ISSUE)

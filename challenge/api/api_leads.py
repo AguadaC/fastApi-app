@@ -21,15 +21,11 @@ async def create_lead(lead: CreateLeadModel, request: Request):
 
     Args:
         lead (CreateLeadModel): The lead data to be created. This includes:
-            - dni (str): The DNI of the lead.
-            - name (str): The name of the lead.
-            - email (Optional[str]): The optional email of the lead.
-            - phone (Optional[str]): The optional phone number of the lead.
-            - address (Optional[str]): The optional address of the lead.
+        dni, name, email, phone and address.
         request (Request): The FastAPI request object, used for logging.
 
     Returns:
-        dict: A dictionary containing the ID of the created lead. For example:
+        dict: A dictionary containing the ID of the created lead.
 
     Raise:
         StudentAlreadyExists: When the student exists.
@@ -40,13 +36,13 @@ async def create_lead(lead: CreateLeadModel, request: Request):
     try:
         lead_in_db = await db_handler._get_student_id_by_dni(dni=lead.dni)
         raise StudentAlreadyExists(
-                    f"Student with DNI: {lead.dni}, exists. ID record: {lead_in_db}"
-              )
+                    f"Student with DNI: {lead.dni}, exists. ID record: {lead_in_db}")
     except StudentDoesNotExist:
-        lead_in_db = await db_handler.create_student(dni=lead.dni,
-                                                    name=lead.name,
-                                                    email=lead.email,
-                                                    phone=lead.phone)
+        lead_in_db = await db_handler._create_student(dni=lead.dni,
+                                                      name=lead.name,
+                                                      email=lead.email,
+                                                      phone=lead.phone,
+                                                      address=lead.address)
     logger.info(f"Lead {lead_in_db} created sucessfully")
     return {"student_id": lead_in_db}
 
@@ -64,7 +60,7 @@ async def get_leads(request: Request):
     logger = request.app.logger
     logger.info("Getting leads...")
     db_handler = DbHandler()
-    leads = await db_handler.get_all_students()
+    leads = await db_handler._get_all_students()
     return leads
 
 @router.get("/{register_id}", response_model=ResponseLead)
@@ -82,5 +78,5 @@ async def get_lead_by_id(request: Request, register_id: int = Path(gt = 0)):
     logger = request.app.logger
     logger.info("Getting lead by ID {register_id}...")
     db_handler = DbHandler()
-    lead = await db_handler.get_student_by_id(register_id)
+    lead = await db_handler._get_student_by_id(register_id)
     return lead
