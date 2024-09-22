@@ -1,6 +1,6 @@
 # FastApi-app project.
 
-[[_TOC_]]
+[TOC]
 
 ## Funcional Documentation
 
