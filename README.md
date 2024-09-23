@@ -1,5 +1,7 @@
 # FastApi-app project.
 
+[TOC]
+
 ## Funcional Documentation
 
 Information for the user.
@@ -166,8 +168,6 @@ This structured approach allows for modularity and clarity in the API, ensuring 
 - **Errors Raised:**
   - `StudentAlreadyExists`: If a student with the provided DNI already exists.
 
----
-
 ##### Get All Leads
 
 - **HTTP Method:** 
@@ -224,8 +224,6 @@ This structured approach allows for modularity and clarity in the API, ensuring 
   - `email`: The email of the student.
   - `phone`: The phone number of the student.
   - `address`: The address of the student.
-
----
 
 ##### Get Lead by ID
 
@@ -322,8 +320,6 @@ This structured approach allows for modularity and clarity in the API, ensuring 
 
 - **Errors Raised:**
   - `StudentCareerEnroll`: If the student is already enrolled in the specified career.
-
----
 
 ##### Enroll Student in a Subject
 
@@ -427,8 +423,6 @@ This structured approach allows for modularity and clarity in the API, ensuring 
   The response conforms to the `ResponseSubjectEnroll`, which includes:
   - `id`: The enrollment ID of the student in the subject.
 
----
-
 ##### Get Record by ID
 
 - **HTTP Method:** 
@@ -477,8 +471,6 @@ This structured approach allows for modularity and clarity in the API, ensuring 
   - All fields from `AddLeadRecord` plus:
   - `id`: The ID of the lead record.
   - `class_duration`: The duration of the class.
-
----
 
 ##### Get All Records
 
@@ -544,8 +536,6 @@ This structured approach allows for modularity and clarity in the API, ensuring 
   - All fields from `AddLeadRecord` plus:
   - `id`: The ID of the lead record.
   - `class_duration`: The duration of the class.
-
----
 
 #### Exceptions and Status Codes
 
