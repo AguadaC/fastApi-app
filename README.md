@@ -1,7 +1,5 @@
 # FastApi-app project.
 
-[TOC]
-
 ## Funcional Documentation
 
 Information for the user.
@@ -599,6 +597,40 @@ All exceptions are handled by FastApi exception handlers.
 
     Any other type of exception not specifically covered in the previous cases will be handled as a basic Exception. This will return an HTTP status code of HTTP_500_INTERNAL_SERVER_ERROR along with details derived from the exception itself.
 
+### Data Pre-Set Information
+
+When utilizing the service APIs to enroll a student in a subject, the application requires three fundamental data points: the student's DNI, the name of the career, and the name of the subject. The application performs two key validations:
+
+1- It verifies that the subject is associated with the career, effectively simulating a curriculum structure.
+
+2- It checks that the student is enrolled in the career, thereby enabling enrollment in the subject.
+
+Therefore, to create an enrollment, it is essential to adhere to the established relationship between careers and subjects.
+
+- electrical_engineering
+
+  - electronic_circuits
+  - digital_systems
+  - mathematics
+  - physics
+  - computer_science
+
+- civil_engineering
+
+  - structural_analysis
+  - geotechnical_engineering
+  - mathematics
+  - physics
+  - chemistry
+
+- chemical_engineering
+
+  - organic_chemistry
+  - inorganic_chemistry
+  - mathematics
+  - chemistry
+  - biology
+
 
 ### Quick Start
 
@@ -652,3 +684,170 @@ The view is this:
 
 - One example of these steps:
 ![example api test](./resources/response.png)
+
+
+## Tecnical Documentation
+
+### Database Structure
+
+The database structure has been designed to efficiently manage information related to students, careers, and subjects. It employs a relational model that allows for the representation of relationships between different entities. Below is a detailed overview of the database architecture:
+
+#### Main Entities
+
+- Students: This table stores basic information about students, including a unique identifier (student_id), document number (dni), name, email, phone number, and address.
+
+- Careers: This table contains the different careers available at the institution. Each career has a unique identifier (id) and a descriptive name.
+
+- Subjects: This table holds the subjects offered within the careers. Each subject has a unique identifier (id), a name, and the class duration in hours.
+
+#### Relationships Between Entities
+
+The database employs several relationships to connect the entities:
+
+Many-to-Many Relationship Between Students and Careers: The student_career table manages the relationship between students and careers, allowing a student to enroll in multiple careers and a career to have multiple students. This table includes student_id, career_id, and the enrollment year (year_enroll).
+
+Many-to-Many Relationship Between Careers and Subjects: The career_subject table enables a career to be associated with multiple subjects and vice versa. It contains career_id and subject_id.
+
+Many-to-Many Relationship Between Students and Subjects Through Careers: The subject_enrollments table connects students with specific subjects within their careers. It includes student_id, career_subject_id (a composite key for career and subject), and the number of times the student has enrolled in that subject (enroll_times).
+
+![ER diagram](./resources/ER_diagram.png)
+
+#### Cascade behavior
+
+There are specific cascading behaviors defined through foreign key constraints. These cascading actions ensure that when a record is deleted, all related records in other tables are also automatically removed, maintaining data integrity. Here’s how it works for each entity:
+
+##### Deleting a Career
+
+When a career is deleted from the careers table, the following actions occur:
+
+  - Related Records in career_subject: All entries in the career_subject table that reference the deleted career will also be deleted. This ensures that there are no orphaned records that reference a career that no longer exists.
+
+  - Related Records in student_career: Similarly, any records in the student_career table that link students to the deleted career will be removed.
+
+##### Deleting a Student
+
+When a student is deleted from the students table:
+
+  - Related Records in student_career: All entries in the student_career table that associate the student with any career will be deleted, ensuring no student-career relationships remain for a non-existent student.
+
+  - Related Records in subject_enrollments: Any records in the subject_enrollments table related to the deleted student will also be removed, preventing any enrollments from being left without an associated student.
+
+##### Deleting a Subject
+
+When a subject is deleted from the subjects table:
+
+  - Related Records in career_subject: All records in the career_subject table that reference the deleted subject will be deleted, ensuring that there are no career-subject relationships for a non-existent subject.
+
+  - Related Records in subject_enrollments: Any entries in the subject_enrollments table that involve the deleted subject will also be removed, maintaining the integrity of the enrollment data.
+
+As said before in [pre-set information](#data-pre-set-information), this structure was used to simulate a similar behavior of a curriculum structure.
+
+### System Architecture Overview
+
+The system architecture consists of a well-organized directory structure that separates concerns among configuration files, application logic, database management, testing, and resources. The challenge directory serves as the core of the FastAPI application, containing necessary configurations, models, API routes, and singleton classes to manage database connections and logging, ensuring a modular and maintainable codebase.
+
+#### Root tree
+
+root/
+├── .dockerignore
+├── .gitignore
+├── docker-compose.yaml
+├── Dockerfile
+├── main.py
+├── pyproject.toml
+├── README.md
+├── requirements-test.txt
+├── requirements.txt
+├── setup.py
+├── tests/
+├── resources/
+├── postgres/
+│   ├── Dockerfile
+│   ├── initdb.sql
+│   └── README.md
+|
+└── challenge/
+    ├── version.py
+    ├── settings.py
+    ├── constants.py
+    ├── exceptions.py
+    ├── api/
+    │   ├── api_enroll.py
+    │   ├── api_records.py
+    │   ├── api_root.py
+    │   └── api_leads.py
+    ├── core/
+    │   ├── db_handler.py
+    │   └── log_manager.py
+    ├── models/
+    │   ├── sql_models.py
+    │   └── api_models.py
+    └── utils/
+        └── error_management.py
+
+Functional Groups
+
+  - Configuration and Setup Files
+    - .dockerignore: Specifies files and directories to ignore when building a Docker image, helping to reduce the image size.
+
+    - .gitignore: Lists files and directories that should be ignored by Git, preventing unnecessary files from being tracked.
+
+    - docker-compose.yaml: Defines and manages the multi-container Docker application, specifying services, networks, and volumes.
+
+    - Dockerfile: Contains instructions to build the Docker image for the application, including setting up the environment.
+
+    - pyproject.toml: Configuration file for Python projects, specifying dependencies and project metadata.
+
+    - requirements-test.txt: Lists dependencies required for testing the application.
+
+    - requirements.txt: Contains the main dependencies required to run the application.
+
+    -setup.py: Script for installing the application as a Python package.
+
+  - Application Logic
+
+    - main.py: The entry point of the FastAPI application, responsible for initializing and running the server.
+
+  - Testing
+
+    - tests/: Directory containing unit tests to ensure the functionality of the application is verified.
+
+  - Resources
+
+    - resources/: Stores images and other resources used in the README file.
+
+  - Database Management
+
+    - postgres/: Contains Dockerfiles and scripts needed to build the PostgreSQL image for the application.
+
+  - Challenge Directory
+
+    - challenge/: Main directory containing all necessary files for the FastAPI application.
+
+      - version.py: Manages versioning of the application.
+
+      - settings.py: Handles configuration variables, reading from environment variables.
+
+      - constants.py: Defines constant values used throughout the application.
+
+      - exceptions.py: Contains custom exception classes for handling errors and undesired outcomes.
+
+    - Subdirectories in Challenge
+
+      - api/: Contains files for each route created, with their respective methods and endpoints, facilitating the API structure of the application.
+    
+      - core/: Includes core functionalities, such as:
+
+        - db_handler.py: Declares the DbHandler singleton class, which manages the database connection and query methods.
+
+        - log_manager.py: Declares the LogManager singleton class for handling logging within the application.
+    
+      - models/: Contains models used in the application:
+
+        - sql_models.py: Defines the database models for querying.
+
+        - api_models.py: Defines request and response models used by the APIs.
+
+      - utils/: Contains utility functions that support the application logic.
+
+#### Environment variables
