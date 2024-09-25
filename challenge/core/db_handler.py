@@ -21,11 +21,12 @@ from challenge.models.sql_models import (Student,
                                          CareerSubject,
                                          SubjectEnrollment)
 from challenge.models.api_models import RetriveLeadRecord
+from challenge.core.singleton import Singleton
 
 
 logger = LogManager().logger()
 
-class DbHandler:
+class DbHandler(metaclass=Singleton):
     """Class to manage transfers with the db"""
 
     def __init__(self):
@@ -33,6 +34,7 @@ class DbHandler:
         Initialize the DbHandler instance with database connection settings.
         Sets up the asynchronous engine and sessionmaker for interacting with the database.
         """
+        super().__init__()
         self._database_url = (
             'postgresql+asyncpg://'
             f'{settings.POSTGRES_USER}:{settings.POSTGRES_PASSWORD}'
@@ -44,6 +46,10 @@ class DbHandler:
             class_=AsyncSession,
             expire_on_commit=False
         )
+
+    async def close(self):
+        """Close the database engine and all sessions."""
+        await self._engine.dispose()
 
 #==============================================================================
 # Methods for Students querys

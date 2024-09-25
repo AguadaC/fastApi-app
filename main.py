@@ -4,6 +4,7 @@
 import uvicorn
 from fastapi import FastAPI
 from fastapi.exceptions import RequestValidationError
+from fastapi.middleware.cors import CORSMiddleware
 from typing import AsyncIterator
 from contextlib import asynccontextmanager
 
@@ -18,6 +19,7 @@ from challenge.utils.error_management import (unexpected_error_handler,
                                               data_type_error_request,
                                               connection_refused_error)
 from challenge.exceptions import BaseError
+from challenge.core.db_handler import DbHandler
 
 
 #Lifespan events
@@ -42,14 +44,26 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.logger = log_manager.logger()
     app.logger.info(f"Unit version: {constants.VERSION}")
     app.logger.info(f"Starting unit execution.")
+    db_handler = DbHandler()
     try:
         yield
     finally:
     # ShutDown event
+        await db_handler.close()
         app.logger.info("Shutting down.")
+
 
 # Initialize App object
 app = FastAPI(lifespan=lifespan)
+
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # App metadata
 app.title       = constants.TITLE

@@ -1,6 +1,15 @@
 version: '3.3'
 
 services:
+  challenge-web:
+    image: fastapi-web:latest
+    ports:
+      - "3000:3000"
+    environment:
+      REACT_APP_URL_BASE: localhost:8000
+    depends_on:
+      - challenge
+
   challenge:
     build:
       context: .
