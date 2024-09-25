@@ -748,6 +748,7 @@ The system architecture consists of a well-organized directory structure that se
 
 #### Root tree
 
+```
 root/
 ├── .dockerignore
 ├── .gitignore
@@ -784,6 +785,7 @@ root/
     │   └── api_models.py
     └── utils/
         └── error_management.py
+```
 
 Functional Groups
 
@@ -851,3 +853,48 @@ Functional Groups
       - utils/: Contains utility functions that support the application logic.
 
 #### Environment variables
+
+- REACT_APP_URL_BASE
+
+  - Defines the base URL that the frontend application will use to make requests to the backend API.
+  - Value: localhost:8000
+  - Usage: This value is used in the React application code to construct the URLs for HTTP requests to the backend service.
+
+- POSTGRES_HOST
+
+  - Description: Specifies the host where the PostgreSQL database is located.
+  - Value: postgres
+  - Usage: This value allows the challenge service to connect to the PostgreSQL database using the service name defined in the docker-compose.yml file.
+
+- POSTGRES_USER
+
+  - Description: Defines the username for accessing the PostgreSQL database.
+  - Value: postgres
+  - Usage: This user is used to authenticate connections to the database and must have the necessary permissions to perform required operations by the application.
+
+- POSTGRES_PASSWORD
+
+  - Description: Specifies the password associated with the PostgreSQL user.
+  - Value: postgres
+  - Usage: This password is necessary to authenticate the user defined in POSTGRES_USER when attempting to connect to the database.
+
+- POSTGRES_DB
+
+  - Description: Indicates the name of the database to be used in PostgreSQL.
+  - Value: challenge_db
+  - Usage: This value is used to create and select the database that the application will use to store and retrieve data.
+
+- POSTGRES_ECHO
+
+  - Description: Allows enabling or disabling logging of SQL queries on the PostgreSQL server.
+  - Value: 'true'
+  - Usage: If set to 'true', all SQL queries executed by the application will be logged in the PostgreSQL server logs, which is useful for debugging and monitoring.
+
+### How to Deploy
+
+#### FrontEnd
+
+#### BackEnd
+
+
+### Run test
