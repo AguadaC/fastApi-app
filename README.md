@@ -1,6 +1,9 @@
 # FastApi-app project.
 
-## Funcional Documentation
+This is a **backend** application for managing the enrollment of leads in careers and subjects.
+The **frontend** application is in **[this repository](https://github.com/AguadaC/fastApi-app-web)**.
+
+## Functional Documentation
 
 Information for the user.
 
@@ -42,7 +45,7 @@ This project aims to efficiently manage the registration of students and their e
 
 - The system must use a relational database (preferably PostgreSQL) to store lead information and maintain data integrity.
 
-#### Dockerization:
+#### Docker:
 
 - The backend service must be containerized using Docker, facilitating easier deployment and management.
 
@@ -636,42 +639,62 @@ Therefore, to create an enrollment, it is essential to adhere to the established
 
 #### Pre-requirements
 
-1- Install `docker` and `docker-compose`. You can check [this oficial documentation](https://docs.docker.com/desktop/install/linux/ubuntu/).
+- Install `docker` and `docker-compose`. You can check [this official documentation](https://docs.docker.com/desktop/install/linux/ubuntu/).
+- Download the frontend project.
+- Go to the root directory of the frontend project.
+- Build the frontend image with the tag **fastapi-web**
+- Create the directories that you will need.
+- Create the directory `/opt/challenge/data`:
 
-2- Create the directories that you will need.
+```bash
+sudo mkdir -p /opt/challenge/data
+```
 
-- `/opt/challenge/logs`
-- `/opt/challenge/data`
+- Create the directory `/opt/challenge/logs`:
 
+```bash
+sudo mkdir -p /opt/challenge/logs
+```
 #### Steps
-
-1- Download the project.
-
-2- Go to the project root path.
-
-3- Run de docker-compose file.
+- Go to the root directory of the backend project.
+- Run the Docker Compose:
 
 ```bash
 docker-compose up --build
 ```
 
-4- Verify the successful deployment of the units.
-You have to see the following messages:
+- Check that services are UP. You MUST to see the messages:
 
-```
-postgres_1   | 2024-09-22 22:12:51.726 UTC [1] LOG:  database system is ready to accept connections
+```bash
+postgres_1       | 2024-09-25 13:57:38.616 UTC [1] LOG:  database system is ready to accept connections
 .
 .
+challenge_1      | 2024-09-25 13:57:39,939 - Challenge - INFO - Unit version: 0.0.1.dev1
+challenge_1      | 2024-09-25 13:57:39,940 - Challenge - INFO - Starting unit execution.
+challenge_1      | INFO:     Application startup complete.
+challenge_1      | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 .
-challenge_1  | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+.
+challenge-web_1  |   Local:            http://localhost:3000
+challenge-web_1  |   On Your Network:  http://172.18.0.4:3000
+challenge-web_1  | 
+challenge-web_1  | Note that the development build is not optimized.
+challenge-web_1  | To create a production build, use npm run build.
+challenge-web_1  | 
+challenge-web_1  | webpack compiled successfully
+challenge-web_1  | Compiling...
+challenge-web_1  | Compiled successfully!
+challenge-web_1  | webpack compiled successfully
 ```
 
-5- In your browser, access to [http://0.0.0.0:8000/docs](http://0.0.0.0:8000/docs). This is the swagger page where you can test the available endpoints.
+#### Swagger
+
+- In your browser, access to [http://0.0.0.0:8000/docs](http://0.0.0.0:8000/docs). This is the swagger page where you can test the available endpoints.
 
 The view is this:
 ![swagger page view](./resources/swagger_page.png)
 
-6- Once there. Test the api what you want. [The APIS description is here](#apis-structure)
+- Once there. Test the api what you want. [The APIS description is here](#apis-structure)
 
 - Expand the API
 ![expand image](./resources/expand_api.png)
@@ -685,8 +708,14 @@ The view is this:
 - One example of these steps:
 ![example api test](./resources/response.png)
 
+#### Stop services
 
-## Tecnical Documentation
+- Press `CTRL + c` to stop the processes.
+
+
+## Technical Documentation
+
+To complement this documentation, read the [Functional Documentation](#functional-documentation).
 
 ### Database Structure
 
@@ -742,7 +771,9 @@ When a subject is deleted from the subjects table:
 
 As said before in [pre-set information](#data-pre-set-information), this structure was used to simulate a similar behavior of a curriculum structure.
 
-### System Architecture Overview
+### System Architecture
+
+#### Overview
 
 The system architecture consists of a well-organized directory structure that separates concerns among configuration files, application logic, database management, testing, and resources. The challenge directory serves as the core of the FastAPI application, containing necessary configurations, models, API routes, and singleton classes to manage database connections and logging, ensuring a modular and maintainable codebase.
 
@@ -892,9 +923,83 @@ Functional Groups
 
 ### How to Deploy
 
+The deployment has 3 functional blocks:
+- Frontend
+- Backend
+- Postgres database.
+
+**Important**: You will need to download the frontend project from the mentioned link in the [beginning of this document](#fastapi-app-project), in the first overview.
+
 #### FrontEnd
 
-#### BackEnd
+Once you download the frontend project, build the image with the tag **fastapi-web**. To do this, you can follow the steps in the frontend README.
+
+#### BackEnd and database
+
+The docker compose build automatically the backend project and the postgres database.
+
+#### Steps
+- Install `docker` and `docker-compose`. You can check [this official documentation](https://docs.docker.com/desktop/install/linux/ubuntu/).
+- Download the frontend project.
+- Go to the root directory of the frontend project.
+- Build the frontend image with the tag **fastapi-web**
+- Create the directory `/opt/challenge/data`:
+
+```bash
+sudo mkdir -p /opt/challenge/data
+```
+
+- Create the directory `/opt/challenge/logs`:
+
+```bash
+sudo mkdir -p /opt/challenge/logs
+```
+
+- Go to the root directory of the backend project.
+- Run the Docker Compose:
+
+```bash
+docker-compose up --build
+```
+
+- Check that services are UP. You MUST to see the messages:
+
+```bash
+postgres_1       | 2024-09-25 13:57:38.616 UTC [1] LOG:  database system is ready to accept connections
+.
+.
+challenge_1      | 2024-09-25 13:57:39,939 - Challenge - INFO - Unit version: 0.0.1.dev1
+challenge_1      | 2024-09-25 13:57:39,940 - Challenge - INFO - Starting unit execution.
+challenge_1      | INFO:     Application startup complete.
+challenge_1      | INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+.
+.
+challenge-web_1  |   Local:            http://localhost:3000
+challenge-web_1  |   On Your Network:  http://172.18.0.4:3000
+challenge-web_1  | 
+challenge-web_1  | Note that the development build is not optimized.
+challenge-web_1  | To create a production build, use npm run build.
+challenge-web_1  | 
+challenge-web_1  | webpack compiled successfully
+challenge-web_1  | Compiling...
+challenge-web_1  | Compiled successfully!
+challenge-web_1  | webpack compiled successfully
+```
+
+- Press `CTRL + c` to stop the processes.
 
 
 ### Run test
+
+- Go to the root directory of the backend project.
+- Install requirements-test.txt
+
+```bash
+pip install -r requirements-test.txt
+```
+
+- Run pytest command:
+
+```bash
+pytest
+```
