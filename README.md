@@ -766,7 +766,7 @@ Here, if you click on an ID, yo will access to the details of that enrollment re
 
 ![Detail enrollment record view](./resources/web_get_lead_by_id.png)
 
-But if you. from the home page, click on the form enrollment, you will be able to load an lead with a career and subject.
+But if you, from the home page, click on the form enrollment, you will be able to load an lead with a career and subject.
 
 ![Form enrollment view](./resources/web_form_page.png).
 
@@ -900,7 +900,7 @@ Functional Groups
 
     - requirements.txt: Contains the main dependencies required to run the application.
 
-    -setup.py: Script for installing the application as a Python package.
+    - setup.py: Script for installing the application as a Python package.
 
   - Application Logic
 
