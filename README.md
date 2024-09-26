@@ -169,6 +169,13 @@ This structured approach allows for modularity and clarity in the API, ensuring 
 - **Errors Raised:**
   - `StudentAlreadyExists`: If a student with the provided DNI already exists.
 
+- **Flow of information**
+
+Let's suppose that each piece of information has a valid type.
+
+- The student's existence is validated by his or her DNI. If the DNI is in the database an [exception](#exceptions-and-status-codes) will be raised.
+- If no exception is triggered the student will be created.
+
 ##### Get All Leads
 
 - **HTTP Method:** 
@@ -322,6 +329,15 @@ This structured approach allows for modularity and clarity in the API, ensuring 
 - **Errors Raised:**
   - `StudentCareerEnroll`: If the student is already enrolled in the specified career.
 
+- **Flow of information**
+
+Let's suppose that each piece of information has a valid type.
+
+- The student's existence is validated by his or her DNI. If the DNI is not in the database an [exception](#exceptions-and-status-codes) will be raised.
+- The career's existence are validated by its name. If it does NOT exist, the process will trigger an [exception](#exceptions-and-status-codes).
+- If the student is enrolled in the career an [exception](#exceptions-and-status-codes) will be triggered.
+- If no exception is raised until this step, the student will be enrolled in the career.
+
 ##### Enroll Student in a Subject
 
 - **HTTP Method:** 
@@ -364,6 +380,16 @@ This structured approach allows for modularity and clarity in the API, ensuring 
 - **Response Model:**
   The response conforms to the `ResponseSubjectEnroll`, which includes:
   - `id`: The ID of the newly created student-subject enrollment record.
+
+- **Flow of information**
+
+Let's suppose that each piece of information has a valid type.
+
+- The student's existence is validated by his or her DNI. If the DNI is not in the database an [exception](#exceptions-and-status-codes) will be raised.
+- The career and the subject's existence are validated by their names. If they do NOT exist, the process will trigger an [exception](#exceptions-and-status-codes).
+- If the student is not enrolled in the career an [exception](#exceptions-and-status-codes) will be triggered.
+- If the subject is not [related to the career](#data-pre-set-information), it will raise an [exception](#exceptions-and-status-codes).
+- If no exception is triggered until this step, the student will be enrolled in the subject.
 
 
 #### Records Router (/records)
@@ -423,6 +449,17 @@ This structured approach allows for modularity and clarity in the API, ensuring 
 - **Response Model:**
   The response conforms to the `ResponseSubjectEnroll`, which includes:
   - `id`: The enrollment ID of the student in the subject.
+
+- **Flow of information**
+
+Let's suppose that each piece of information has a valid type.
+
+- The student's existence is validated by his or her DNI. If they exist, the student's information in the database will be used to complete the record.
+If the DNI is not in the database, a new student will be created, with the information entered.
+- The career and the subject's existences are validated by their names. If they do NOT exist, the process will trigger an [exception](#exceptions-and-status-codes).
+- If the student is not enrolled in the career, they will be enrolled automatically.
+- If the subject is not [related to the career](#data-pre-set-information), it will raise an [exception](#exceptions-and-status-codes).
+- If no exception is triggered until this step, the student will be enrolled in the subject.
 
 ##### Get Record by ID
 
@@ -544,7 +581,7 @@ This section outlines the exceptions that may be raised during the operation of 
 
 All exceptions are handled by FastApi exception handlers.
 
-##### Exeptions with STATUS_CODE HTTP_303_SEE_OTHER
+##### Exceptions with STATUS_CODE HTTP_303_SEE_OTHER
 
 - BaseError:
 
@@ -582,19 +619,19 @@ All exceptions are handled by FastApi exception handlers.
 
     Raised when attempting to retrieve or manipulate an enrollment record that does not exist. It provides error handling for record-related operations.
 
-##### Exeptions with STATUS_CODE HTTP_428_PRECONDITION_REQUIRED
+##### Exceptions with STATUS_CODE HTTP_428_PRECONDITION_REQUIRED
 
 - OSError:
 
     This exception is raised when a system-related error occurs, such as issues with file handling, network connectivity, or other operating system-related failures. It can be raised when the connection with the database is unreacheble.
 
-##### Exeptions with STATUS_CODE HTTP_406_NOT_ACCEPTABLE
+##### Exceptions with STATUS_CODE HTTP_406_NOT_ACCEPTABLE
 
 - RequestValidationError:
 
     This exception is raised when the request data sent to the API does not meet the expected validation criteria defined in the request models. It typically occurs when required fields are missing, fields contain invalid data types, or when the data fails any defined validation checks (such as value ranges or formats)
 
-##### Exeptions with STATUS_CODE HTTP_500_INTERNAL_SERVER_ERROR
+##### Exceptions with STATUS_CODE HTTP_500_INTERNAL_SERVER_ERROR
 
 - Exception:
 
@@ -643,7 +680,6 @@ Therefore, to create an enrollment, it is essential to adhere to the established
 - Download the frontend project.
 - Go to the root directory of the frontend project.
 - Build the frontend image with the tag **fastapi-web**
-- Create the directories that you will need.
 - Create the directory `/opt/challenge/data`:
 
 ```bash
@@ -655,7 +691,9 @@ sudo mkdir -p /opt/challenge/data
 ```bash
 sudo mkdir -p /opt/challenge/logs
 ```
+
 #### Steps
+
 - Go to the root directory of the backend project.
 - Run the Docker Compose:
 
@@ -707,6 +745,33 @@ The view is this:
 
 - One example of these steps:
 ![example api test](./resources/response.png)
+
+#### Web UI
+
+- In your browser, access to [http://0.0.0.0:3000](http://0.0.0.0:3000). This is the web page where you can enroll leads, see all records using pagination and get the detail of each enrollment.
+
+This is a view of the Homepage:
+
+![Homepage view](./resources/web_home_page.png)
+
+Here you can chose between see the enrollment records, or access to the enrollment form and load a lead with career and subject.
+
+If you chose see the enrollment records:
+
+![Enrollment record view](./resources/web_get_leads.png)
+
+Here, if you click on an ID, yo will access to the details of that enrollment record.
+
+![Selection ID view](./resources/web_get_lead_2.png)
+
+![Detail enrollment record view](./resources/web_get_lead_by_id.png)
+
+But if you. from the home page, click on the form enrollment, you will be able to load an lead with a career and subject.
+
+![Form enrollment view](./resources/web_form_page.png).
+
+There are two ways to enroll an lead, please read [this section]()
+
 
 #### Stop services
 

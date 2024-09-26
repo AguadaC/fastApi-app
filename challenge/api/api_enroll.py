@@ -82,6 +82,7 @@ async def enroll_student_in_a_subject(request: Request,
     db_handler = DbHandler()
     student_id = await db_handler._get_student_id_by_dni(dni=student_career_subject.student_dni)
     career_id = await db_handler._get_career_id_by_name(name=student_career_subject.career_name)
+    await db_handler._get_student_career_by_ids(student_id=student_id, career_id=career_id)
     subject_id = await db_handler._get_subject_id_by_name(subject_name=student_career_subject.subject_name)
     career_subject_id = await db_handler._get_career_subject_id(career_id=career_id,
                                                                 subject_id=subject_id)

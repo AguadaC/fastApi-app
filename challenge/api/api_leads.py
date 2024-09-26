@@ -43,7 +43,7 @@ async def create_lead(lead: CreateLeadModel, request: Request):
                                                       email=lead.email,
                                                       phone=lead.phone,
                                                       address=lead.address)
-    logger.info(f"Lead {lead_in_db} created sucessfully")
+    logger.info(f"Lead {lead_in_db} created successfully")
     return {"student_id": lead_in_db}
 
 @router.get("/", response_model=List[ResponseLead])
